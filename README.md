@@ -16,3 +16,5 @@ python main.py
 ```
 
 Open http://localhost:8050/
+
+![visualizaiton](screenshot.png)
