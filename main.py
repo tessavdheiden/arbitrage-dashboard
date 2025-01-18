@@ -9,6 +9,7 @@ from datetime import datetime
 import threading
 import sys
 import time
+from itertools import product
 
 root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 sys.path.append(root + '/python')
@@ -80,15 +81,21 @@ async def bot():
         ms = int(time.time() * 1000)
         timestamp = datetime.fromtimestamp(ms / 1000.0).strftime('%Y-%m-%d %H:%M:%S')
 
-        symbol_prices = [exchange_prices[symbol]['last'] for exchange_prices in prices]
+        # Extract bid and ask prices for the current symbol
+        bids = {ex: px[symbol]['bid'] for ex, px in zip(exchanges, prices)}
+        asks = {ex: px[symbol]['ask'] for ex, px in zip(exchanges, prices)}
 
-        min_price = min(symbol_prices)
-        max_price = max(symbol_prices)
+        # Generate combinations of bids and asks from different exchanges
+        combinations = [
+            (b_ex, b_p, a_ex, a_p, b_p - a_p)
+            for (b_ex, b_p), (a_ex, a_p) in product(bids.items(), asks.items())
+            if b_ex != a_ex and b_p is not None and a_p is not None
+        ]
+
+        # Find the combination with the maximum spread
+        max_exchange, max_price, min_exchange, min_price, price_profit = max(combinations, key=lambda x: x[4])
 
         order_size = order_sizes[symbol]
-
-        min_exchange = exchanges[symbol_prices.index(min_price)]
-        max_exchange = exchanges[symbol_prices.index(max_price)]
 
         # calculate min exchange taker fee
         # warning: you need to manually check if there are special campaign fees
@@ -100,7 +107,6 @@ async def bot():
         max_exchange_fee = max_exchange.fees['trading']['taker']
         max_fee = order_size * max_price * max_exchange_fee
 
-        price_profit = max_price - min_price
         profit = (price_profit * order_size) - min_fee - max_fee
 
         market_data[symbol]['time'].append(timestamp)
@@ -114,17 +120,19 @@ async def bot():
 
 
 def save_data():
-    all_data = []
-    for symbol, data in market_data.items():
-        for t, p in zip(data["time"], data["profit"]):
-            all_data.append({"symbol": symbol, "time": t, "profit": p})
+    all_data = [
+        {"symbol": symbol, "time": t, "profit": p}
+        for symbol, data in market_data.items()
+        for t, p in zip(data["time"], data["profit"])
+    ]
 
     df = pd.DataFrame(all_data)
-
-    # Or Save to CSV
-    file = "market_data.csv"
-    df.to_csv(file, index=False)
+    df.to_csv("market_data.csv", index=False)
     print(f"Market data saved to disk at {len(df)} entries.")
+
+    df_wallet = pd.DataFrame(wallet)
+    df_wallet.to_csv("wallet_data.csv", index=False)
+    print(f"Wallet data saved to disk at {len(df_wallet)} entries.")
 
 
 async def data_generator():
