@@ -32,7 +32,7 @@ app.layout = html.Div([
     dcc.Graph(id='filled-plot'),
     dcc.Interval(
         id='interval-component',
-        interval=2000,  # Update every 2 seconds
+        interval=10,  # Update every 1/100 seconds
         n_intervals=0
     )
 ])
