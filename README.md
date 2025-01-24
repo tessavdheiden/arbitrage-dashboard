@@ -17,4 +17,4 @@ python main.py
 
 Open http://localhost:8050/
 
-![viz](https://github.com/tessavdheiden/arbitrage-dashboard/blob/main/viz.gif)
+![](https://github.com/tessavdheiden/arbitrage-dashboard/blob/main/viz.gif)
