@@ -14,13 +14,15 @@ data = {}
 # Symbols and exchanges
 symbols = ['ETH/USD', 'BTC/USD', "LTC/USD"]
 exchanges = [
-    # ccxt.exmo({'options': {'defaultType': 'spot'}}),
     ccxt.cryptocom({'options': {'defaultType': 'spot'}}),
     ccxt.okx({'options': {'defaultType': 'spot'}}),
-    # ccxt.myokx({'options': {'defaultType': 'spot'}}),
-    # ccxt.whitebit({'options': {'defaultType': 'spot'}}),
-    # ccxt.kraken({'options': {'defaultType': 'spot'}}),
 ]
+
+# symbols = ['ETH/EUR', 'BTC/EUR', "LTC/EUR"]
+# exchanges = [
+#     ccxt.binance({'options': {'defaultType': 'spot'}}),
+#     ccxt.bitget({'options': {'defaultType': 'spot'}}),
+# ]
 
 # Initialize shared data
 for symbol in symbols:
